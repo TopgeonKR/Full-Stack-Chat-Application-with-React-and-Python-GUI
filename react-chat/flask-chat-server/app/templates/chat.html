@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Room</title>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+</head>
+<body>
+    <h1>Welcome to the Chat Room</h1>
+
+    <!-- 로그인한 사용자 이름 표시 -->
+    <p><strong>Logged in as:</strong> {{ username }}</p>
+
+    <!-- 이전 채팅 기록 표시 -->
+    <div id="chat-box">
+        {% for message in messages %}
+            <p><strong>{{ message.username }}:</strong> {{ message.message }}</p>
+        {% endfor %}
+    </div>
+
+    <!-- 채팅 입력 -->
+    <form id="chat-form">
+        <input type="text" id="message" placeholder="Type your message..." required>
+        <button type="submit">Send</button>
+    </form>
+
+    <script>
+        const socket = io();
+
+        // 채팅 메시지 전송
+        const form = document.getElementById('chat-form');
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const input = document.getElementById('message');
+            const message = input.value;
+            socket.emit('send_message', { message });
+            input.value = '';
+        });
+
+        // 새 메시지 수신
+        socket.on('receive_message', function (data) {
+            const chatBox = document.getElementById('chat-box');
+            const newMessage = document.createElement('p');
+            newMessage.innerHTML = `<strong>${data.username}:</strong> ${data.message}`;
+            chatBox.appendChild(newMessage);
+        });
+    </script>
+</body>
+</html>
